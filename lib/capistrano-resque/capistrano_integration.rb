@@ -10,6 +10,7 @@ module CapistranoResque
         _cset(:resque_kill_signal, "QUIT")
         _cset(:interval, "5")
         _cset(:resque_environment_task, false)
+        _cset(:resque_log_verbose, true)
 
         def workers_roles
           return workers.keys if workers.first[1].is_a? Hash
@@ -35,7 +36,8 @@ module CapistranoResque
 
         def start_command(queue, pid)
           "cd #{current_path} && RAILS_ENV=#{rails_env} QUEUE=\"#{queue}\" \
-           PIDFILE=#{pid} BACKGROUND=yes VERBOSE=1 INTERVAL=#{interval} \
+           PIDFILE=#{pid} BACKGROUND=yes \
+           #{"VERBOSE=1" if fetch(:resque_log_verbose)} INTERVAL=#{interval} \
            #{fetch(:bundle_cmd, "bundle")} exec rake \
            #{"environment" if fetch(:resque_environment_task)} \
            resque:work"
@@ -57,7 +59,7 @@ module CapistranoResque
 
         def start_scheduler(pid)
           "cd #{current_path} && RAILS_ENV=#{rails_env} \
-           PIDFILE=#{pid} BACKGROUND=yes VERBOSE=1 MUTE=1 \
+           PIDFILE=#{pid} BACKGROUND=yes #{"VERBOSE=1" if fetch(:resque_log_verbose)} MUTE=1 \
            #{fetch(:bundle_cmd, "bundle")} exec rake resque:scheduler"
         end
 
